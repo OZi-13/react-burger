@@ -7,13 +7,6 @@
   background-color: var(--background-alt);
 }
 
-.title {
-  width: 100%;
-  max-width: 1260px;
-  margin-right: auto;
-  margin-left: auto;
-}
-
 .main {
   display: flex;
   flex: 1 1 auto;
@@ -22,13 +15,6 @@
   min-height: 0;
   margin: 0 auto;
   overflow: hidden;
-}
-
-.placeholder {
-  flex: 1 1 auto;
-  width: 100%;
-  max-width: 1260px;
-  margin: 0 auto;
 }
 
 .status {

@@ -8,6 +8,7 @@ import { BurgerIngredients } from '@components/burger-ingredients/burger-ingredi
 import { IngredientDetails } from '@components/ingredient-details/ingredient-details';
 import { Modal } from '@components/modal/modal';
 import { OrderDetails } from '@components/order-details/order-details';
+import { PageHeader } from '@components/page-header/page-header';
 import { getIngredients } from '@utils/api';
 
 import type { TIngredient } from '@utils/types';
@@ -49,11 +50,7 @@ const getConstructorIngredients = (
 };
 
 const PlaceholderPage = ({ title }: TPlaceholderPageProps): React.JSX.Element => {
-  return (
-    <main className={`${styles.placeholder} pl-5 pr-5`}>
-      <h1 className="text text_type_main-large mt-10">{title}</h1>
-    </main>
-  );
+  return <PageHeader title={title} />;
 };
 
 const ConstructorPage = (): React.JSX.Element => {
@@ -110,9 +107,7 @@ const ConstructorPage = (): React.JSX.Element => {
 
   return (
     <>
-      <h1 className={`${styles.title} text text_type_main-large mt-10 mb-5 pl-5`}>
-        Соберите бургер
-      </h1>
+      <PageHeader title="Соберите бургер" />
       <main className={`${styles.main} pl-5 pr-5`}>
         {isLoading && (
           <div className={styles.status}>

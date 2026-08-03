@@ -11,13 +11,13 @@ import { OrderDetails } from '@components/order-details/order-details';
 import { PageHeader } from '@components/page-header/page-header';
 import { getIngredients } from '@utils/api';
 
-import type { TIngredient } from '@utils/types';
+import type { TConstructorIngredient, TIngredient } from '@utils/types';
 
 import styles from './app.module.css';
 
 type TConstructorIngredients = {
   bun?: TIngredient;
-  fillings: TIngredient[];
+  fillings: TConstructorIngredient[];
 };
 
 type TPlaceholderPageProps = {
@@ -41,7 +41,12 @@ const getConstructorIngredients = (
     ingredients.find((ingredient) => ingredient.name === 'Плоды Фалленианского дерева'),
     ingredients.find((ingredient) => ingredient.name === 'Хрустящие минеральные кольца'),
     ingredients.find((ingredient) => ingredient.name === 'Хрустящие минеральные кольца'),
-  ].filter((ingredient): ingredient is TIngredient => Boolean(ingredient));
+  ]
+    .filter((ingredient): ingredient is TIngredient => Boolean(ingredient))
+    .map((ingredient, index) => ({
+      ...ingredient,
+      constructorId: `${ingredient._id}-${index}`,
+    }));
 
   return {
     bun: selectedBun,
@@ -55,6 +60,10 @@ const PlaceholderPage = ({ title }: TPlaceholderPageProps): React.JSX.Element =>
 
 const ConstructorPage = (): React.JSX.Element => {
   const [ingredients, setIngredients] = useState<TIngredient[]>([]);
+  const [burgerConstructorIngredients, setBurgerConstructorIngredients] =
+    useState<TConstructorIngredients>({
+      fillings: [],
+    });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedIngredient, setSelectedIngredient] = useState<TIngredient | null>(null);
@@ -64,6 +73,7 @@ const ConstructorPage = (): React.JSX.Element => {
     getIngredients()
       .then((data) => {
         setIngredients(data);
+        setBurgerConstructorIngredients(getConstructorIngredients(data));
       })
       .catch(() => {
         setError('Не удалось загрузить ингредиенты. Попробуйте обновить страницу.');
@@ -86,9 +96,25 @@ const ConstructorPage = (): React.JSX.Element => {
     setIsOrderModalOpen(false);
   }, []);
 
-  const burgerConstructorIngredients = useMemo(
-    () => getConstructorIngredients(ingredients),
-    [ingredients]
+  const handleMoveConstructorIngredient = useCallback(
+    (dragIndex: number, hoverIndex: number): void => {
+      setBurgerConstructorIngredients((currentIngredients) => {
+        const nextFillings = [...currentIngredients.fillings];
+        const [draggedIngredient] = nextFillings.splice(dragIndex, 1);
+
+        if (!draggedIngredient) {
+          return currentIngredients;
+        }
+
+        nextFillings.splice(hoverIndex, 0, draggedIngredient);
+
+        return {
+          ...currentIngredients,
+          fillings: nextFillings,
+        };
+      });
+    },
+    []
   );
 
   const ingredientCounts = useMemo(() => {
@@ -129,6 +155,7 @@ const ConstructorPage = (): React.JSX.Element => {
             <BurgerConstructor
               bun={burgerConstructorIngredients.bun}
               fillings={burgerConstructorIngredients.fillings}
+              onMoveIngredient={handleMoveConstructorIngredient}
               onOrderClick={handleOrderClick}
             />
           </>

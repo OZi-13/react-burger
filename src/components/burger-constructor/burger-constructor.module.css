@@ -25,6 +25,26 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  transition: opacity 0.2s ease;
+}
+
+.item_dragging {
+  opacity: 0.35;
+}
+
+.drag_handle {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  padding: 0;
+  color: var(--text-primary-color);
+  background: transparent;
+  border: 0;
+  cursor: grab;
+}
+
+.drag_handle:active {
+  cursor: grabbing;
 }
 
 .order {

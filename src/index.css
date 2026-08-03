@@ -1,3 +1,15 @@
+:root {
+  --background: #1c1c21;
+  --background-alt: #131316;
+  --background-element: #2f2f37;
+  --text-primary-color: white;
+  --text-inactive-color: #8585ad;
+  --colors-interface-accent: #4c4cff;
+  --colors-interface-error: #e52b1a;
+  --colors-interface-success: #0cc;
+  --colors-button-inactive: #3a3a55;
+}
+
 body {
   margin: 0;
 }

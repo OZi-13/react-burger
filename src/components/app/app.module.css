@@ -21,3 +21,11 @@
   margin: 0 auto;
   overflow: hidden;
 }
+
+.status {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 400px;
+}

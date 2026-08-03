@@ -1,0 +1,7 @@
+.page_header {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1260px;
+  margin-right: auto;
+  margin-left: auto;
+}

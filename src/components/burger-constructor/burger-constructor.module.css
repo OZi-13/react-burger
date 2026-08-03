@@ -1,7 +1,61 @@
 .burger_constructor {
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
   width: 600px;
+  height: 100%;
+  min-height: 0;
   padding-bottom: 20px;
   color: var(--text-primary-color);
+}
+
+.list {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+  margin-right: -8px;
+  padding: 0 8px 0 0;
+  overflow-y: auto;
+  list-style-type: none;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: opacity 0.2s ease;
+}
+
+.item_dragging {
+  opacity: 0.35;
+}
+
+.drag_handle {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  padding: 0;
+  color: var(--text-primary-color);
+  background: transparent;
+  border: 0;
+  cursor: grab;
+}
+
+.drag_handle:active {
+  cursor: grabbing;
+}
+
+.order {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 40px;
+}
+
+.total {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }

@@ -1,5 +1,5 @@
 import { Counter, CurrencyIcon, Tab } from '@krgaa/react-developer-burger-ui-components';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 import type { TIngredient } from '@utils/types';
 
@@ -23,6 +23,8 @@ export const BurgerIngredients = ({
   onIngredientClick,
 }: TBurgerIngredientsProps): React.JSX.Element => {
   const [currentTab, setCurrentTab] = useState('bun');
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
 
   const ingredientsByType = useMemo(() => {
     return INGREDIENT_TYPES.map((ingredientType) => ({
@@ -36,9 +38,20 @@ export const BurgerIngredients = ({
   const handleTabClick = (value: string): void => {
     setCurrentTab(value);
 
-    document
-      .getElementById(value)
-      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const scrollContainer = scrollContainerRef.current;
+    const section = sectionRefs.current[value];
+
+    if (scrollContainer && section) {
+      const top =
+        section.getBoundingClientRect().top -
+        scrollContainer.getBoundingClientRect().top +
+        scrollContainer.scrollTop;
+
+      scrollContainer.scrollTo({
+        behavior: 'smooth',
+        top,
+      });
+    }
   };
 
   return (
@@ -55,12 +68,15 @@ export const BurgerIngredients = ({
           </Tab>
         ))}
       </nav>
-      <div className={`${styles.scroll} custom-scroll`}>
+      <div ref={scrollContainerRef} className={`${styles.scroll} custom-scroll`}>
         {ingredientsByType.map((ingredientType) => (
           <section
             key={ingredientType.value}
             id={ingredientType.value}
             className="mb-10"
+            ref={(node) => {
+              sectionRefs.current[ingredientType.value] = node;
+            }}
           >
             <h2 className="text text_type_main-medium mb-6">{ingredientType.title}</h2>
             <ul className={`${styles.list} pl-4 pr-4`}>

@@ -1,5 +1,6 @@
 import { Preloader } from '@krgaa/react-developer-burger-ui-components';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Route, Routes } from 'react-router-dom';
 
 import { AppHeader } from '@components/app-header/app-header';
 import { BurgerConstructor } from '@components/burger-constructor/burger-constructor';
@@ -13,7 +14,49 @@ import type { TIngredient } from '@utils/types';
 
 import styles from './app.module.css';
 
-export const App = (): React.JSX.Element => {
+type TConstructorIngredients = {
+  bun?: TIngredient;
+  fillings: TIngredient[];
+};
+
+type TPlaceholderPageProps = {
+  title: string;
+};
+
+const getConstructorIngredients = (
+  ingredients: TIngredient[]
+): TConstructorIngredients => {
+  const selectedBun =
+    ingredients.find((ingredient) => ingredient.name === 'Краторная булка N-200i') ??
+    ingredients.find((ingredient) => ingredient.type === 'bun');
+
+  const selectedFillings = [
+    ingredients.find(
+      (ingredient) => ingredient.name === 'Соус традиционный галактический'
+    ),
+    ingredients.find(
+      (ingredient) => ingredient.name === 'Мясо бессмертных моллюсков Protostomia'
+    ),
+    ingredients.find((ingredient) => ingredient.name === 'Плоды Фалленианского дерева'),
+    ingredients.find((ingredient) => ingredient.name === 'Хрустящие минеральные кольца'),
+    ingredients.find((ingredient) => ingredient.name === 'Хрустящие минеральные кольца'),
+  ].filter((ingredient): ingredient is TIngredient => Boolean(ingredient));
+
+  return {
+    bun: selectedBun,
+    fillings: selectedFillings,
+  };
+};
+
+const PlaceholderPage = ({ title }: TPlaceholderPageProps): React.JSX.Element => {
+  return (
+    <main className={`${styles.placeholder} pl-5 pr-5`}>
+      <h1 className="text text_type_main-large mt-10">{title}</h1>
+    </main>
+  );
+};
+
+const ConstructorPage = (): React.JSX.Element => {
   const [ingredients, setIngredients] = useState<TIngredient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -46,34 +89,10 @@ export const App = (): React.JSX.Element => {
     setIsOrderModalOpen(false);
   }, []);
 
-  const burgerConstructorIngredients = useMemo(() => {
-    const selectedBun =
-      ingredients.find((ingredient) => ingredient.name === 'Краторная булка N-200i') ??
-      ingredients.find((ingredient) => ingredient.type === 'bun');
-
-    const selectedFillings = [
-      ingredients.find(
-        (ingredient) => ingredient.name === 'Соус традиционный галактический'
-      ),
-      ingredients.find(
-        (ingredient) => ingredient.name === 'Мясо бессмертных моллюсков Protostomia'
-      ),
-      ingredients.find(
-        (ingredient) => ingredient.name === 'Плоды Фалленианского дерева'
-      ),
-      ingredients.find(
-        (ingredient) => ingredient.name === 'Хрустящие минеральные кольца'
-      ),
-      ingredients.find(
-        (ingredient) => ingredient.name === 'Хрустящие минеральные кольца'
-      ),
-    ].filter((ingredient): ingredient is TIngredient => Boolean(ingredient));
-
-    return {
-      bun: selectedBun,
-      fillings: selectedFillings,
-    };
-  }, [ingredients]);
+  const burgerConstructorIngredients = useMemo(
+    () => getConstructorIngredients(ingredients),
+    [ingredients]
+  );
 
   const ingredientCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -90,8 +109,7 @@ export const App = (): React.JSX.Element => {
   }, [burgerConstructorIngredients]);
 
   return (
-    <div className={styles.app}>
-      <AppHeader />
+    <>
       <h1 className={`${styles.title} text text_type_main-large mt-10 mb-5 pl-5`}>
         Соберите бургер
       </h1>
@@ -131,6 +149,19 @@ export const App = (): React.JSX.Element => {
           <OrderDetails />
         </Modal>
       )}
+    </>
+  );
+};
+
+export const App = (): React.JSX.Element => {
+  return (
+    <div className={styles.app}>
+      <AppHeader />
+      <Routes>
+        <Route path="/" element={<ConstructorPage />} />
+        <Route path="/feed" element={<PlaceholderPage title="Лента заказов" />} />
+        <Route path="/profile" element={<PlaceholderPage title="Личный кабинет" />} />
+      </Routes>
     </div>
   );
 };

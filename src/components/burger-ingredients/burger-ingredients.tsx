@@ -73,7 +73,6 @@ export const BurgerIngredients = ({
           <section
             key={ingredientType.value}
             id={ingredientType.value}
-            className="mb-10"
             ref={(node) => {
               sectionRefs.current[ingredientType.value] = node;
             }}

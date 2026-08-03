@@ -1,6 +1,5 @@
 import { Preloader } from '@krgaa/react-developer-burger-ui-components';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Route, Routes } from 'react-router-dom';
 
 import { AppHeader } from '@components/app-header/app-header';
 import { BurgerConstructor } from '@components/burger-constructor/burger-constructor';
@@ -11,6 +10,7 @@ import { OrderDetails } from '@components/order-details/order-details';
 import { PageHeader } from '@components/page-header/page-header';
 import { getIngredients } from '@utils/api';
 
+import type { TPagePath } from '@components/app-header/app-header';
 import type { TConstructorIngredient, TIngredient } from '@utils/types';
 
 import styles from './app.module.css';
@@ -69,6 +69,16 @@ const PlaceholderPage = ({ title }: TPlaceholderPageProps): React.JSX.Element =>
   return <PageHeader title={title} />;
 };
 
+const getCurrentPath = (): TPagePath => {
+  const { pathname } = window.location;
+
+  if (pathname === '/feed' || pathname === '/profile') {
+    return pathname;
+  }
+
+  return '/';
+};
+
 const ConstructorPage = ({
   burgerConstructorIngredients,
   error,
@@ -114,6 +124,7 @@ const ConstructorPage = ({
 };
 
 export const App = (): React.JSX.Element => {
+  const [activePath, setActivePath] = useState<TPagePath>(getCurrentPath);
   const [ingredients, setIngredients] = useState<TIngredient[]>([]);
   const [burgerConstructorIngredients, setBurgerConstructorIngredients] =
     useState<TConstructorIngredients>({
@@ -137,6 +148,28 @@ export const App = (): React.JSX.Element => {
         setIsLoading(false);
       });
   }, []);
+
+  useEffect(() => {
+    const handlePopState = (): void => {
+      setActivePath(getCurrentPath());
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return (): void => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  const handleNavigate = useCallback(
+    (path: TPagePath): void => {
+      if (path !== activePath) {
+        window.history.pushState(null, '', path);
+        setActivePath(path);
+      }
+    },
+    [activePath]
+  );
 
   const handleIngredientClick = useCallback((ingredient: TIngredient): void => {
     setSelectedIngredient(ingredient);
@@ -188,26 +221,21 @@ export const App = (): React.JSX.Element => {
 
   return (
     <div className={styles.app}>
-      <AppHeader />
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <ConstructorPage
-              burgerConstructorIngredients={burgerConstructorIngredients}
-              error={error}
-              ingredientCounts={ingredientCounts}
-              ingredients={ingredients}
-              isLoading={isLoading}
-              onIngredientClick={handleIngredientClick}
-              onMoveIngredient={handleMoveConstructorIngredient}
-              onOrderClick={handleOrderClick}
-            />
-          }
+      <AppHeader activePath={activePath} onNavigate={handleNavigate} />
+      {activePath === '/' && (
+        <ConstructorPage
+          burgerConstructorIngredients={burgerConstructorIngredients}
+          error={error}
+          ingredientCounts={ingredientCounts}
+          ingredients={ingredients}
+          isLoading={isLoading}
+          onIngredientClick={handleIngredientClick}
+          onMoveIngredient={handleMoveConstructorIngredient}
+          onOrderClick={handleOrderClick}
         />
-        <Route path="/feed" element={<PlaceholderPage title="Лента заказов" />} />
-        <Route path="/profile" element={<PlaceholderPage title="Личный кабинет" />} />
-      </Routes>
+      )}
+      {activePath === '/feed' && <PlaceholderPage title="Лента заказов" />}
+      {activePath === '/profile' && <PlaceholderPage title="Личный кабинет" />}
       {selectedIngredient && (
         <Modal title="Детали ингредиента" onClose={handleCloseModal}>
           <IngredientDetails ingredient={selectedIngredient} />

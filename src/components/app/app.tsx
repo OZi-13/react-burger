@@ -24,6 +24,17 @@ type TPlaceholderPageProps = {
   title: string;
 };
 
+type TConstructorPageProps = {
+  burgerConstructorIngredients: TConstructorIngredients;
+  error: string;
+  ingredientCounts: Record<string, number>;
+  ingredients: TIngredient[];
+  isLoading: boolean;
+  onIngredientClick: (ingredient: TIngredient) => void;
+  onMoveIngredient: (dragIndex: number, hoverIndex: number) => void;
+  onOrderClick: () => void;
+};
+
 const getConstructorIngredients = (
   ingredients: TIngredient[]
 ): TConstructorIngredients => {
@@ -58,7 +69,51 @@ const PlaceholderPage = ({ title }: TPlaceholderPageProps): React.JSX.Element =>
   return <PageHeader title={title} />;
 };
 
-const ConstructorPage = (): React.JSX.Element => {
+const ConstructorPage = ({
+  burgerConstructorIngredients,
+  error,
+  ingredientCounts,
+  ingredients,
+  isLoading,
+  onIngredientClick,
+  onMoveIngredient,
+  onOrderClick,
+}: TConstructorPageProps): React.JSX.Element => {
+  return (
+    <>
+      <PageHeader title="Соберите бургер" />
+      <main className={`${styles.main} pl-5 pr-5`}>
+        {isLoading && (
+          <div className={styles.status}>
+            <Preloader />
+          </div>
+        )}
+        {error && (
+          <div className={styles.status}>
+            <p className="text text_type_main-default">{error}</p>
+          </div>
+        )}
+        {!isLoading && !error && (
+          <>
+            <BurgerIngredients
+              ingredientCounts={ingredientCounts}
+              ingredients={ingredients}
+              onIngredientClick={onIngredientClick}
+            />
+            <BurgerConstructor
+              bun={burgerConstructorIngredients.bun}
+              fillings={burgerConstructorIngredients.fillings}
+              onMoveIngredient={onMoveIngredient}
+              onOrderClick={onOrderClick}
+            />
+          </>
+        )}
+      </main>
+    </>
+  );
+};
+
+export const App = (): React.JSX.Element => {
   const [ingredients, setIngredients] = useState<TIngredient[]>([]);
   const [burgerConstructorIngredients, setBurgerConstructorIngredients] =
     useState<TConstructorIngredients>({
@@ -132,35 +187,27 @@ const ConstructorPage = (): React.JSX.Element => {
   }, [burgerConstructorIngredients]);
 
   return (
-    <>
-      <PageHeader title="Соберите бургер" />
-      <main className={`${styles.main} pl-5 pr-5`}>
-        {isLoading && (
-          <div className={styles.status}>
-            <Preloader />
-          </div>
-        )}
-        {error && (
-          <div className={styles.status}>
-            <p className="text text_type_main-default">{error}</p>
-          </div>
-        )}
-        {!isLoading && !error && (
-          <>
-            <BurgerIngredients
+    <div className={styles.app}>
+      <AppHeader />
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <ConstructorPage
+              burgerConstructorIngredients={burgerConstructorIngredients}
+              error={error}
               ingredientCounts={ingredientCounts}
               ingredients={ingredients}
+              isLoading={isLoading}
               onIngredientClick={handleIngredientClick}
-            />
-            <BurgerConstructor
-              bun={burgerConstructorIngredients.bun}
-              fillings={burgerConstructorIngredients.fillings}
               onMoveIngredient={handleMoveConstructorIngredient}
               onOrderClick={handleOrderClick}
             />
-          </>
-        )}
-      </main>
+          }
+        />
+        <Route path="/feed" element={<PlaceholderPage title="Лента заказов" />} />
+        <Route path="/profile" element={<PlaceholderPage title="Личный кабинет" />} />
+      </Routes>
       {selectedIngredient && (
         <Modal title="Детали ингредиента" onClose={handleCloseModal}>
           <IngredientDetails ingredient={selectedIngredient} />
@@ -171,19 +218,6 @@ const ConstructorPage = (): React.JSX.Element => {
           <OrderDetails />
         </Modal>
       )}
-    </>
-  );
-};
-
-export const App = (): React.JSX.Element => {
-  return (
-    <div className={styles.app}>
-      <AppHeader />
-      <Routes>
-        <Route path="/" element={<ConstructorPage />} />
-        <Route path="/feed" element={<PlaceholderPage title="Лента заказов" />} />
-        <Route path="/profile" element={<PlaceholderPage title="Личный кабинет" />} />
-      </Routes>
     </div>
   );
 };

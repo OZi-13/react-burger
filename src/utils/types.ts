@@ -21,3 +21,15 @@ export type TIngredientsResponse = {
   success: boolean;
   data: TIngredient[];
 };
+
+export type TCreateOrderRequest = {
+  ingredients: string[];
+};
+
+export type TCreateOrderResponse = {
+  success: boolean;
+  name: string;
+  order: {
+    number: number;
+  };
+};

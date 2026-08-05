@@ -1,6 +1,11 @@
 import { BURGER_API_URL } from '@utils/constants';
 
-import type { TIngredientsResponse, TIngredient } from '@utils/types';
+import type {
+  TCreateOrderRequest,
+  TCreateOrderResponse,
+  TIngredientsResponse,
+  TIngredient,
+} from '@utils/types';
 
 const checkResponse = <T>(response: Response): Promise<T> => {
   if (!response.ok) {
@@ -33,4 +38,31 @@ export const getIngredients = (): Promise<TIngredient[]> => {
     });
 
   return ingredientsRequest;
+};
+
+export const createOrder = (
+  ingredients: TCreateOrderRequest['ingredients']
+): Promise<number> => {
+  return fetch(`${BURGER_API_URL}/orders`, {
+    body: JSON.stringify({ ingredients }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    method: 'POST',
+  })
+    .then((response) => checkResponse<TCreateOrderResponse>(response))
+    .then((response) => {
+      if (!response.success) {
+        return Promise.reject(new Error('API вернул неуспешный ответ'));
+      }
+
+      return response.order.number;
+    })
+    .catch((error: unknown) => {
+      if (error instanceof Error) {
+        return Promise.reject(error);
+      }
+
+      return Promise.reject(new Error('Неизвестная ошибка запроса'));
+    });
 };

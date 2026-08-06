@@ -2,15 +2,14 @@ import { Counter, CurrencyIcon, Tab } from '@krgaa/react-developer-burger-ui-com
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useDrag } from 'react-dnd';
 
+import { selectIngredientCounts } from '@services/burger-constructor/burger-constructor-slice';
+import { setCurrentIngredient } from '@services/current-ingredient/current-ingredient-slice';
+import { useAppDispatch, useAppSelector } from '@services/hooks';
+import { selectIngredients } from '@services/ingredients/ingredients-slice';
+
 import type { TIngredient } from '@utils/types';
 
 import styles from './burger-ingredients.module.css';
-
-type TBurgerIngredientsProps = {
-  ingredientCounts: Record<string, number>;
-  ingredients: TIngredient[];
-  onIngredientClick: (ingredient: TIngredient) => void;
-};
 
 const INGREDIENT_TYPES = [
   { title: 'Булки', value: 'bun' },
@@ -66,11 +65,10 @@ const IngredientCard = ({
   );
 };
 
-export const BurgerIngredients = ({
-  ingredientCounts,
-  ingredients,
-  onIngredientClick,
-}: TBurgerIngredientsProps): React.JSX.Element => {
+export const BurgerIngredients = (): React.JSX.Element => {
+  const dispatch = useAppDispatch();
+  const ingredients = useAppSelector(selectIngredients);
+  const ingredientCounts = useAppSelector(selectIngredientCounts);
   const [currentTab, setCurrentTab] = useState('bun');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -134,6 +132,10 @@ export const BurgerIngredients = ({
     }
   };
 
+  const handleIngredientClick = (ingredient: TIngredient): void => {
+    dispatch(setCurrentIngredient(ingredient));
+  };
+
   return (
     <section className={styles.burger_ingredients}>
       <nav className={styles.tabs}>
@@ -168,7 +170,7 @@ export const BurgerIngredients = ({
                   <IngredientCard
                     count={ingredientCounts[ingredient._id] ?? 0}
                     ingredient={ingredient}
-                    onIngredientClick={onIngredientClick}
+                    onIngredientClick={handleIngredientClick}
                   />
                 </li>
               ))}

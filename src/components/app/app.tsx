@@ -9,22 +9,11 @@ import { Modal } from '@components/modal/modal';
 import { OrderDetails } from '@components/order-details/order-details';
 import { PageHeader } from '@components/page-header/page-header';
 import {
-  addConstructorIngredient,
-  moveConstructorIngredient,
-  removeConstructorIngredient,
-  selectConstructorBun,
-  selectConstructorIngredients,
-  selectConstructorTotalPrice,
-  selectIngredientCounts,
-} from '@services/burger-constructor/burger-constructor-slice';
-import {
   clearCurrentIngredient,
   selectCurrentIngredient,
-  setCurrentIngredient,
 } from '@services/current-ingredient/current-ingredient-slice';
 import { useAppDispatch, useAppSelector } from '@services/hooks';
 import {
-  selectIngredients,
   selectIngredientsError,
   selectIngredientsIsLoading,
 } from '@services/ingredients/ingredients-slice';
@@ -35,10 +24,8 @@ import {
   selectOrderIsLoading,
   selectOrderNumber,
 } from '@services/order/order-slice';
-import { createOrderThunk } from '@services/order/order-thunks';
 
 import type { TPagePath } from '@components/app-header/app-header';
-import type { TConstructorIngredient, TIngredient } from '@utils/types';
 
 import styles from './app.module.css';
 
@@ -47,19 +34,9 @@ type TPlaceholderPageProps = {
 };
 
 type TConstructorPageProps = {
-  bun: TIngredient | null;
   error: string;
-  fillings: TConstructorIngredient[];
-  ingredientCounts: Record<string, number>;
-  ingredients: TIngredient[];
   isLoading: boolean;
-  isOrderLoading: boolean;
-  onIngredientClick: (ingredient: TIngredient) => void;
-  onIngredientDrop: (ingredient: TIngredient) => void;
-  onMoveIngredient: (dragIndex: number, hoverIndex: number) => void;
   onOrderClick: () => void;
-  onRemoveIngredient: (constructorId: string) => void;
-  totalPrice: number;
 };
 
 const PlaceholderPage = ({ title }: TPlaceholderPageProps): React.JSX.Element => {
@@ -77,19 +54,9 @@ const getCurrentPath = (): TPagePath => {
 };
 
 const ConstructorPage = ({
-  bun,
   error,
-  fillings,
-  ingredientCounts,
-  ingredients,
   isLoading,
-  isOrderLoading,
-  onIngredientClick,
-  onIngredientDrop,
-  onMoveIngredient,
   onOrderClick,
-  onRemoveIngredient,
-  totalPrice,
 }: TConstructorPageProps): React.JSX.Element => {
   return (
     <>
@@ -107,21 +74,8 @@ const ConstructorPage = ({
         )}
         {!isLoading && !error && (
           <>
-            <BurgerIngredients
-              ingredientCounts={ingredientCounts}
-              ingredients={ingredients}
-              onIngredientClick={onIngredientClick}
-            />
-            <BurgerConstructor
-              bun={bun}
-              fillings={fillings}
-              isOrderLoading={isOrderLoading}
-              totalPrice={totalPrice}
-              onIngredientDrop={onIngredientDrop}
-              onMoveIngredient={onMoveIngredient}
-              onOrderClick={onOrderClick}
-              onRemoveIngredient={onRemoveIngredient}
-            />
+            <BurgerIngredients />
+            <BurgerConstructor onOrderClick={onOrderClick} />
           </>
         )}
       </main>
@@ -133,11 +87,6 @@ export const App = (): React.JSX.Element => {
   const dispatch = useAppDispatch();
   const [activePath, setActivePath] = useState<TPagePath>(getCurrentPath);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
-  const bun = useAppSelector(selectConstructorBun);
-  const fillings = useAppSelector(selectConstructorIngredients);
-  const ingredientCounts = useAppSelector(selectIngredientCounts);
-  const totalPrice = useAppSelector(selectConstructorTotalPrice);
-  const ingredients = useAppSelector(selectIngredients);
   const isLoading = useAppSelector(selectIngredientsIsLoading);
   const error = useAppSelector(selectIngredientsError);
   const selectedIngredient = useAppSelector(selectCurrentIngredient);
@@ -171,34 +120,9 @@ export const App = (): React.JSX.Element => {
     [activePath]
   );
 
-  const handleIngredientClick = useCallback(
-    (ingredient: TIngredient): void => {
-      dispatch(setCurrentIngredient(ingredient));
-    },
-    [dispatch]
-  );
-
-  const handleIngredientDrop = useCallback(
-    (ingredient: TIngredient): void => {
-      dispatch(addConstructorIngredient(ingredient));
-    },
-    [dispatch]
-  );
-
   const handleOrderClick = useCallback((): void => {
-    if (!bun) {
-      return;
-    }
-
-    const orderIngredients = [
-      bun._id,
-      ...fillings.map((ingredient) => ingredient._id),
-      bun._id,
-    ];
-
     setIsOrderModalOpen(true);
-    void dispatch(createOrderThunk(orderIngredients));
-  }, [bun, dispatch, fillings]);
+  }, []);
 
   const handleCloseModal = useCallback((): void => {
     dispatch(clearCurrentIngredient());
@@ -206,38 +130,14 @@ export const App = (): React.JSX.Element => {
     setIsOrderModalOpen(false);
   }, [dispatch]);
 
-  const handleMoveConstructorIngredient = useCallback(
-    (dragIndex: number, hoverIndex: number): void => {
-      dispatch(moveConstructorIngredient({ dragIndex, hoverIndex }));
-    },
-    [dispatch]
-  );
-
-  const handleRemoveConstructorIngredient = useCallback(
-    (constructorId: string): void => {
-      dispatch(removeConstructorIngredient(constructorId));
-    },
-    [dispatch]
-  );
-
   return (
     <div className={styles.app}>
       <AppHeader activePath={activePath} onNavigate={handleNavigate} />
       {activePath === '/' && (
         <ConstructorPage
-          bun={bun}
           error={error}
-          fillings={fillings}
-          ingredientCounts={ingredientCounts}
-          ingredients={ingredients}
           isLoading={isLoading}
-          isOrderLoading={isOrderLoading}
-          onIngredientClick={handleIngredientClick}
-          onIngredientDrop={handleIngredientDrop}
-          onMoveIngredient={handleMoveConstructorIngredient}
           onOrderClick={handleOrderClick}
-          onRemoveIngredient={handleRemoveConstructorIngredient}
-          totalPrice={totalPrice}
         />
       )}
       {activePath === '/feed' && <PlaceholderPage title="Лента заказов" />}

@@ -7,6 +7,19 @@ import {
 import { useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 
+import {
+  addConstructorIngredient,
+  clearConstructor,
+  moveConstructorIngredient,
+  removeConstructorIngredient,
+  selectConstructorBun,
+  selectConstructorIngredients,
+  selectConstructorTotalPrice,
+} from '@services/burger-constructor/burger-constructor-slice';
+import { useAppDispatch, useAppSelector } from '@services/hooks';
+import { selectOrderIsLoading } from '@services/order/order-slice';
+import { createOrderThunk } from '@services/order/order-thunks';
+
 import type { TConstructorIngredient, TIngredient } from '@utils/types';
 import type { Identifier, XYCoord } from 'dnd-core';
 
@@ -23,14 +36,7 @@ type TIngredientDragItem = {
 };
 
 type TBurgerConstructorProps = {
-  bun: TIngredient | null;
-  fillings: TConstructorIngredient[];
-  isOrderLoading: boolean;
-  totalPrice: number;
-  onIngredientDrop: (ingredient: TIngredient) => void;
-  onMoveIngredient: (dragIndex: number, hoverIndex: number) => void;
   onOrderClick: () => void;
-  onRemoveIngredient: (constructorId: string) => void;
 };
 
 type TConstructorIngredientProps = {
@@ -133,15 +139,14 @@ const ConstructorIngredient = ({
 };
 
 export const BurgerConstructor = ({
-  bun,
-  fillings,
-  isOrderLoading,
-  totalPrice,
-  onIngredientDrop,
-  onMoveIngredient,
   onOrderClick,
-  onRemoveIngredient,
 }: TBurgerConstructorProps): React.JSX.Element => {
+  const dispatch = useAppDispatch();
+  const bun = useAppSelector(selectConstructorBun);
+  const fillings = useAppSelector(selectConstructorIngredients);
+  const totalPrice = useAppSelector(selectConstructorTotalPrice);
+  const isOrderLoading = useAppSelector(selectOrderIsLoading);
+
   const [{ canDrop, isOver }, drop] = useDrop<
     TIngredientDragItem,
     void,
@@ -154,7 +159,7 @@ export const BurgerConstructor = ({
       isOver: monitor.isOver(),
     }),
     drop: (item) => {
-      onIngredientDrop(item.ingredient);
+      dispatch(addConstructorIngredient(item.ingredient));
     },
   });
 
@@ -172,6 +177,34 @@ export const BurgerConstructor = ({
         </span>
       </div>
     );
+  };
+
+  const handleMoveIngredient = (dragIndex: number, hoverIndex: number): void => {
+    dispatch(moveConstructorIngredient({ dragIndex, hoverIndex }));
+  };
+
+  const handleRemoveIngredient = (constructorId: string): void => {
+    dispatch(removeConstructorIngredient(constructorId));
+  };
+
+  const handleOrderClick = (): void => {
+    if (!bun) {
+      return;
+    }
+
+    const orderIngredients = [
+      bun._id,
+      ...fillings.map((ingredient) => ingredient._id),
+      bun._id,
+    ];
+
+    onOrderClick();
+    void dispatch(createOrderThunk(orderIngredients))
+      .unwrap()
+      .then(() => {
+        dispatch(clearConstructor());
+      })
+      .catch(() => undefined);
   };
 
   return (
@@ -195,8 +228,8 @@ export const BurgerConstructor = ({
               key={ingredient.constructorId}
               index={index}
               ingredient={ingredient}
-              onMoveIngredient={onMoveIngredient}
-              onRemoveIngredient={onRemoveIngredient}
+              onMoveIngredient={handleMoveIngredient}
+              onRemoveIngredient={handleRemoveIngredient}
             />
           ))
         ) : (
@@ -233,7 +266,7 @@ export const BurgerConstructor = ({
           htmlType="button"
           size="large"
           type="primary"
-          onClick={onOrderClick}
+          onClick={handleOrderClick}
         >
           Оформить заказ
         </Button>

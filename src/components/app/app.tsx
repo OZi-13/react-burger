@@ -5,6 +5,7 @@ import { AppHeader } from '@components/app-header/app-header';
 import { IngredientDetails } from '@components/ingredient-details/ingredient-details';
 import { Modal } from '@components/modal/modal';
 import { OrderDetails } from '@components/order-details/order-details';
+import { ProtectedRoute } from '@components/protected-route/protected-route';
 import { FeedPage } from '@pages/feed-page/feed-page';
 import { ForgotPasswordPage } from '@pages/forgot-password-page/forgot-password-page';
 import { HomePage } from '@pages/home-page/home-page';
@@ -16,6 +17,7 @@ import { ProfileOrdersPage } from '@pages/profile-orders-page/profile-orders-pag
 import { ProfilePage } from '@pages/profile-page/profile-page';
 import { RegisterPage } from '@pages/register-page/register-page';
 import { ResetPasswordPage } from '@pages/reset-password-page/reset-password-page';
+import { checkUserAuthThunk } from '@services/auth/auth-thunks';
 import {
   clearCurrentIngredient,
   selectCurrentIngredient,
@@ -57,6 +59,7 @@ export const App = (): React.JSX.Element => {
 
   useEffect(() => {
     void dispatch(fetchIngredients());
+    void dispatch(checkUserAuthThunk());
   }, [dispatch]);
 
   const handleOrderClick = useCallback((): void => {
@@ -88,12 +91,47 @@ export const App = (): React.JSX.Element => {
           }
         />
         <Route path="/feed" element={<FeedPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route
+          path="/login"
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <LoginPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <RegisterPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <ForgotPasswordPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            <ProtectedRoute onlyUnAuth requirePasswordResetRequest>
+              <ResetPasswordPage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/ingredients/:id" element={<IngredientPage />} />
-        <Route path="/profile" element={<ProfileLayout />}>
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfileLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<ProfilePage />} />
           <Route path="orders" element={<ProfileOrdersPage />} />
         </Route>

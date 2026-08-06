@@ -4,59 +4,43 @@ import {
   Logo,
   ProfileIcon,
 } from '@krgaa/react-developer-burger-ui-components';
+import { NavLink } from 'react-router-dom';
 
 import styles from './app-header.module.css';
 
-export type TPagePath = '/' | '/feed' | '/profile';
-
-type TAppHeaderProps = {
-  activePath: TPagePath;
-  onNavigate: (path: TPagePath) => void;
-};
-
 type THeaderLinkProps = {
-  activePath: TPagePath;
   children: (isActive: boolean) => React.ReactNode;
   className?: string;
-  onNavigate: (path: TPagePath) => void;
-  path: TPagePath;
+  end?: boolean;
+  to: string;
 };
 
 const getLinkClassName = (isActive: boolean, extraClass = ''): string =>
   `${styles.link}${isActive ? ` ${styles.link_active}` : ''}${extraClass}`;
 
 const HeaderLink = ({
-  activePath,
   children,
   className = '',
-  onNavigate,
-  path,
+  end = false,
+  to,
 }: THeaderLinkProps): React.JSX.Element => {
-  const isActive = activePath === path;
-
   return (
-    <a
-      href={path}
-      className={getLinkClassName(isActive, className)}
-      onClick={(event) => {
-        event.preventDefault();
-        onNavigate(path);
-      }}
+    <NavLink
+      end={end}
+      to={to}
+      className={({ isActive }) => getLinkClassName(isActive, className)}
     >
-      {children(isActive)}
-    </a>
+      {({ isActive }) => children(isActive)}
+    </NavLink>
   );
 };
 
-export const AppHeader = ({
-  activePath,
-  onNavigate,
-}: TAppHeaderProps): React.JSX.Element => {
+export const AppHeader = (): React.JSX.Element => {
   return (
     <header className={styles.header}>
       <nav className={`${styles.menu} p-4`}>
         <div className={styles.menu_part_left}>
-          <HeaderLink activePath={activePath} path="/" onNavigate={onNavigate}>
+          <HeaderLink end to="/">
             {(isActive) => (
               <>
                 <BurgerIcon type={isActive ? 'primary' : 'secondary'} />
@@ -64,12 +48,7 @@ export const AppHeader = ({
               </>
             )}
           </HeaderLink>
-          <HeaderLink
-            activePath={activePath}
-            className=" ml-10"
-            path="/feed"
-            onNavigate={onNavigate}
-          >
+          <HeaderLink className=" ml-10" to="/feed">
             {(isActive) => (
               <>
                 <ListIcon type={isActive ? 'primary' : 'secondary'} />
@@ -81,12 +60,7 @@ export const AppHeader = ({
         <div className={styles.logo}>
           <Logo />
         </div>
-        <HeaderLink
-          activePath={activePath}
-          className={` ${styles.link_position_last}`}
-          path="/profile"
-          onNavigate={onNavigate}
-        >
+        <HeaderLink className={` ${styles.link_position_last}`} to="/profile">
           {(isActive) => (
             <>
               <ProfileIcon type={isActive ? 'primary' : 'secondary'} />

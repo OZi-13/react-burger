@@ -42,7 +42,7 @@ export const LoginPage = (): React.JSX.Element => {
     event.preventDefault();
     const locationState = location.state as TLocationState | null;
     const redirectPath = locationState?.from
-      ? `${locationState.from.pathname}${locationState.from.search}`
+      ? `${locationState.from.pathname}${locationState.from.search}${locationState.from.hash}`
       : '/';
 
     void dispatch(loginThunk(form))

@@ -36,8 +36,12 @@ export const ProtectedRoute = ({
 
   if (onlyUnAuth && user) {
     const locationState = location.state as TLocationState | null;
+    const redirectLocation = locationState?.from;
+    const redirectPath = redirectLocation
+      ? `${redirectLocation.pathname}${redirectLocation.search}${redirectLocation.hash}`
+      : '/';
 
-    return <Navigate replace to={locationState?.from?.pathname ?? '/'} />;
+    return <Navigate replace to={redirectPath} />;
   }
 
   if (!onlyUnAuth && !user) {

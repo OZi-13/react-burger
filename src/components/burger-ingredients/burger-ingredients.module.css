@@ -53,6 +53,11 @@
   background: transparent;
   border: 0;
   cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.card_dragging {
+  opacity: 0.35;
 }
 
 .image {

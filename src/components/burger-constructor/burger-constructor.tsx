@@ -4,8 +4,21 @@ import {
   CurrencyIcon,
   DragIcon,
 } from '@krgaa/react-developer-burger-ui-components';
-import { useMemo, useRef } from 'react';
+import { useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
+
+import {
+  addConstructorIngredient,
+  clearConstructor,
+  moveConstructorIngredient,
+  removeConstructorIngredient,
+  selectConstructorBun,
+  selectConstructorIngredients,
+  selectConstructorTotalPrice,
+} from '@services/burger-constructor/burger-constructor-slice';
+import { useAppDispatch, useAppSelector } from '@services/hooks';
+import { selectOrderIsLoading } from '@services/order/order-slice';
+import { createOrderThunk } from '@services/order/order-thunks';
 
 import type { TConstructorIngredient, TIngredient } from '@utils/types';
 import type { Identifier, XYCoord } from 'dnd-core';
@@ -18,10 +31,11 @@ type TConstructorIngredientDragItem = {
   index: number;
 };
 
+type TIngredientDragItem = {
+  ingredient: TIngredient;
+};
+
 type TBurgerConstructorProps = {
-  bun?: TIngredient;
-  fillings: TConstructorIngredient[];
-  onMoveIngredient: (dragIndex: number, hoverIndex: number) => void;
   onOrderClick: () => void;
 };
 
@@ -29,12 +43,14 @@ type TConstructorIngredientProps = {
   index: number;
   ingredient: TConstructorIngredient;
   onMoveIngredient: (dragIndex: number, hoverIndex: number) => void;
+  onRemoveIngredient: (constructorId: string) => void;
 };
 
 const ConstructorIngredient = ({
   index,
   ingredient,
   onMoveIngredient,
+  onRemoveIngredient,
 }: TConstructorIngredientProps): React.JSX.Element => {
   const dragHandleRef = useRef<HTMLButtonElement>(null);
   const itemRef = useRef<HTMLLIElement>(null);
@@ -113,6 +129,7 @@ const ConstructorIngredient = ({
         <DragIcon type="primary" />
       </button>
       <ConstructorElement
+        handleClose={() => onRemoveIngredient(ingredient.constructorId)}
         price={ingredient.price}
         text={ingredient.name}
         thumbnail={ingredient.image}
@@ -122,24 +139,77 @@ const ConstructorIngredient = ({
 };
 
 export const BurgerConstructor = ({
-  bun,
-  fillings,
-  onMoveIngredient,
   onOrderClick,
 }: TBurgerConstructorProps): React.JSX.Element => {
-  const totalPrice = useMemo(() => {
-    const bunPrice = bun ? bun.price * 2 : 0;
-    const fillingsPrice = fillings.reduce(
-      (sum, ingredient) => sum + ingredient.price,
-      0
-    );
+  const dispatch = useAppDispatch();
+  const bun = useAppSelector(selectConstructorBun);
+  const fillings = useAppSelector(selectConstructorIngredients);
+  const totalPrice = useAppSelector(selectConstructorTotalPrice);
+  const isOrderLoading = useAppSelector(selectOrderIsLoading);
 
-    return bunPrice + fillingsPrice;
-  }, [bun, fillings]);
+  const [{ canDrop, isOver }, drop] = useDrop<
+    TIngredientDragItem,
+    void,
+    { canDrop: boolean; isOver: boolean }
+  >({
+    accept: 'ingredient',
+    canDrop: (item) => Boolean(item.ingredient),
+    collect: (monitor) => ({
+      canDrop: monitor.canDrop(),
+      isOver: monitor.isOver(),
+    }),
+    drop: (item) => {
+      dispatch(addConstructorIngredient(item.ingredient));
+    },
+  });
+
+  const isDropActive = canDrop && isOver;
+
+  const renderBunPlaceholder = (position: 'top' | 'bottom'): React.JSX.Element => {
+    return (
+      <div
+        className={`${styles.placeholder} ${
+          position === 'top' ? styles.placeholder_top : styles.placeholder_bottom
+        } ml-8${isDropActive ? ` ${styles.placeholder_active}` : ''}`}
+      >
+        <span className="text text_type_main-default text_color_inactive">
+          Перетащите булку
+        </span>
+      </div>
+    );
+  };
+
+  const handleMoveIngredient = (dragIndex: number, hoverIndex: number): void => {
+    dispatch(moveConstructorIngredient({ dragIndex, hoverIndex }));
+  };
+
+  const handleRemoveIngredient = (constructorId: string): void => {
+    dispatch(removeConstructorIngredient(constructorId));
+  };
+
+  const handleOrderClick = (): void => {
+    if (!bun) {
+      return;
+    }
+
+    const orderIngredients = [
+      bun._id,
+      ...fillings.map((ingredient) => ingredient._id),
+      bun._id,
+    ];
+
+    onOrderClick();
+    void dispatch(createOrderThunk(orderIngredients))
+      .unwrap()
+      .then(() => {
+        dispatch(clearConstructor());
+      })
+      .catch(() => undefined);
+  };
 
   return (
-    <section className={`${styles.burger_constructor} pt-15`}>
-      {bun && (
+    <section ref={drop} className={`${styles.burger_constructor} pt-15`}>
+      {bun ? (
         <ConstructorElement
           extraClass="ml-8"
           isLocked
@@ -148,18 +218,33 @@ export const BurgerConstructor = ({
           thumbnail={bun.image}
           type="top"
         />
+      ) : (
+        renderBunPlaceholder('top')
       )}
       <ul className={`${styles.list} custom-scroll mt-4 mb-4`}>
-        {fillings.map((ingredient, index) => (
-          <ConstructorIngredient
-            key={ingredient.constructorId}
-            index={index}
-            ingredient={ingredient}
-            onMoveIngredient={onMoveIngredient}
-          />
-        ))}
+        {fillings.length > 0 ? (
+          fillings.map((ingredient, index) => (
+            <ConstructorIngredient
+              key={ingredient.constructorId}
+              index={index}
+              ingredient={ingredient}
+              onMoveIngredient={handleMoveIngredient}
+              onRemoveIngredient={handleRemoveIngredient}
+            />
+          ))
+        ) : (
+          <li
+            className={`${styles.placeholder} ${styles.placeholder_middle}${
+              isDropActive ? ` ${styles.placeholder_active}` : ''
+            }`}
+          >
+            <span className="text text_type_main-default text_color_inactive">
+              Перетащите ингредиенты
+            </span>
+          </li>
+        )}
       </ul>
-      {bun && (
+      {bun ? (
         <ConstructorElement
           extraClass="ml-8"
           isLocked
@@ -168,13 +253,21 @@ export const BurgerConstructor = ({
           thumbnail={bun.image}
           type="bottom"
         />
+      ) : (
+        renderBunPlaceholder('bottom')
       )}
       <div className={`${styles.order} mt-10`}>
         <span className={styles.total}>
           <span className="text text_type_digits-medium">{totalPrice}</span>
           <CurrencyIcon type="primary" />
         </span>
-        <Button htmlType="button" size="large" type="primary" onClick={onOrderClick}>
+        <Button
+          disabled={!bun || fillings.length === 0 || isOrderLoading}
+          htmlType="button"
+          size="large"
+          type="primary"
+          onClick={handleOrderClick}
+        >
           Оформить заказ
         </Button>
       </div>

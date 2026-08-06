@@ -21,6 +21,38 @@
   list-style-type: none;
 }
 
+.placeholder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 80px;
+  padding: 16px 24px;
+  background: var(--background-element);
+  border: 1px dashed var(--text-inactive-color);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.placeholder_top {
+  border-radius: var(--top-constructor-item-border-radius);
+}
+
+.placeholder_middle {
+  min-height: 240px;
+  border-radius: var(--common-border-radius-s);
+}
+
+.placeholder_bottom {
+  border-radius: var(--bottom-constructor-item-border-radius);
+}
+
+.placeholder_active {
+  border-color: var(--colors-interface-accent);
+  box-shadow: 0 0 16px rgb(76 76 255 / 20%);
+}
+
 .item {
   display: flex;
   align-items: center;

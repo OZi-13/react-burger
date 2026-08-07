@@ -1,8 +1,8 @@
 import { Input, PasswordInput } from '@krgaa/react-developer-burger-ui-components';
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { AuthForm } from '@components/auth-form/auth-form';
+import { useForm } from '@hooks/use-form';
 import { selectAuthError, selectIsAuthLoading } from '@services/auth/auth-slice';
 import { resetPasswordThunk } from '@services/auth/auth-thunks';
 import { useAppDispatch, useAppSelector } from '@services/hooks';
@@ -18,19 +18,10 @@ export const ResetPasswordPage = (): React.JSX.Element => {
   const navigate = useNavigate();
   const error = useAppSelector(selectAuthError);
   const isLoading = useAppSelector(selectIsAuthLoading);
-  const [form, setForm] = useState<TResetPasswordForm>({
+  const { handleChange, values: form } = useForm<TResetPasswordForm>({
     password: '',
     token: '',
   });
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    const { name, value } = event.target;
-
-    setForm((currentForm) => ({
-      ...currentForm,
-      [name]: value,
-    }));
-  };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
     event.preventDefault();

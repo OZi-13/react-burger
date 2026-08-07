@@ -4,8 +4,9 @@ import {
   Input,
   PasswordInput,
 } from '@krgaa/react-developer-burger-ui-components';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 
+import { useForm } from '@hooks/use-form';
 import {
   selectAuthError,
   selectIsAuthLoading,
@@ -35,7 +36,11 @@ export const ProfilePage = (): React.JSX.Element => {
   const user = useAppSelector(selectUser);
   const error = useAppSelector(selectAuthError);
   const isLoading = useAppSelector(selectIsAuthLoading);
-  const [form, setForm] = useState<TProfileForm>(EMPTY_PROFILE_FORM);
+  const {
+    handleChange,
+    setValues: setForm,
+    values: form,
+  } = useForm<TProfileForm>(EMPTY_PROFILE_FORM);
 
   const initialForm = useMemo<TProfileForm>(
     () => ({
@@ -57,15 +62,6 @@ export const ProfilePage = (): React.JSX.Element => {
       form.password !== initialForm.password
     );
   }, [form, initialForm]);
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    const { name, value } = event.target;
-
-    setForm((currentForm) => ({
-      ...currentForm,
-      [name]: value,
-    }));
-  };
 
   const handleCancel = (): void => {
     setForm(initialForm);

@@ -13,7 +13,13 @@ import {
 
 import styles from './ingredient-page.module.css';
 
-export const IngredientPage = (): React.JSX.Element => {
+type TIngredientPageProps = {
+  isModal?: boolean;
+};
+
+export const IngredientPage = ({
+  isModal = false,
+}: TIngredientPageProps): React.JSX.Element => {
   const { id } = useParams();
   const ingredients = useAppSelector(selectIngredients);
   const isLoading = useAppSelector(selectIngredientsIsLoading);
@@ -24,19 +30,27 @@ export const IngredientPage = (): React.JSX.Element => {
     [id, ingredients]
   );
 
+  const content = (
+    <>
+      {isLoading && <Preloader />}
+      {error && <p className="text text_type_main-default">{error}</p>}
+      {!isLoading && !error && ingredient && (
+        <IngredientDetails ingredient={ingredient} />
+      )}
+      {!isLoading && !error && !ingredient && (
+        <p className="text text_type_main-default">Ингредиент не найден</p>
+      )}
+    </>
+  );
+
+  if (isModal) {
+    return content;
+  }
+
   return (
     <>
       <PageHeader title="Детали ингредиента" />
-      <main className={`${styles.page} pl-5 pr-5`}>
-        {isLoading && <Preloader />}
-        {error && <p className="text text_type_main-default">{error}</p>}
-        {!isLoading && !error && ingredient && (
-          <IngredientDetails ingredient={ingredient} />
-        )}
-        {!isLoading && !error && !ingredient && (
-          <p className="text text_type_main-default">Ингредиент не найден</p>
-        )}
-      </main>
+      <main className={`${styles.page} pl-5 pr-5`}>{content}</main>
     </>
   );
 };

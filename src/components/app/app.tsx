@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
 import { AppHeader } from '@components/app-header/app-header';
-import { IngredientDetails } from '@components/ingredient-details/ingredient-details';
 import { Modal } from '@components/modal/modal';
 import { OrderDetails } from '@components/order-details/order-details';
 import { ProtectedRoute } from '@components/protected-route/protected-route';
@@ -18,10 +17,6 @@ import { ProfilePage } from '@pages/profile-page/profile-page';
 import { RegisterPage } from '@pages/register-page/register-page';
 import { ResetPasswordPage } from '@pages/reset-password-page/reset-password-page';
 import { checkUserAuthThunk } from '@services/auth/auth-thunks';
-import {
-  clearCurrentIngredient,
-  selectCurrentIngredient,
-} from '@services/current-ingredient/current-ingredient-slice';
 import { useAppDispatch, useAppSelector } from '@services/hooks';
 import {
   selectIngredientsError,
@@ -52,7 +47,6 @@ export const App = (): React.JSX.Element => {
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const isLoading = useAppSelector(selectIngredientsIsLoading);
   const error = useAppSelector(selectIngredientsError);
-  const selectedIngredient = useAppSelector(selectCurrentIngredient);
   const orderNumber = useAppSelector(selectOrderNumber);
   const isOrderLoading = useAppSelector(selectOrderIsLoading);
   const orderError = useAppSelector(selectOrderError);
@@ -67,9 +61,8 @@ export const App = (): React.JSX.Element => {
   }, []);
 
   const handleCloseIngredientModal = useCallback((): void => {
-    dispatch(clearCurrentIngredient());
     void navigate(-1);
-  }, [dispatch, navigate]);
+  }, [navigate]);
 
   const handleCloseOrderModal = useCallback((): void => {
     dispatch(clearOrder());
@@ -137,10 +130,17 @@ export const App = (): React.JSX.Element => {
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
-      {background && selectedIngredient && (
-        <Modal title="Детали ингредиента" onClose={handleCloseIngredientModal}>
-          <IngredientDetails ingredient={selectedIngredient} />
-        </Modal>
+      {background && (
+        <Routes>
+          <Route
+            path="/ingredients/:id"
+            element={
+              <Modal title="Детали ингредиента" onClose={handleCloseIngredientModal}>
+                <IngredientPage isModal />
+              </Modal>
+            }
+          />
+        </Routes>
       )}
       {isOrderModalOpen && (
         <Modal onClose={handleCloseOrderModal}>

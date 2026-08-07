@@ -1,8 +1,8 @@
 import { EmailInput, PasswordInput } from '@krgaa/react-developer-burger-ui-components';
-import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { AuthForm } from '@components/auth-form/auth-form';
+import { useForm } from '@hooks/use-form';
 import { selectAuthError, selectIsAuthLoading } from '@services/auth/auth-slice';
 import { loginThunk } from '@services/auth/auth-thunks';
 import { useAppDispatch, useAppSelector } from '@services/hooks';
@@ -24,19 +24,10 @@ export const LoginPage = (): React.JSX.Element => {
   const location = useLocation();
   const error = useAppSelector(selectAuthError);
   const isLoading = useAppSelector(selectIsAuthLoading);
-  const [form, setForm] = useState<TLoginForm>({
+  const { handleChange, values: form } = useForm<TLoginForm>({
     email: '',
     password: '',
   });
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    const { name, value } = event.target;
-
-    setForm((currentForm) => ({
-      ...currentForm,
-      [name]: value,
-    }));
-  };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
     event.preventDefault();

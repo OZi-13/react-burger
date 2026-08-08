@@ -23,7 +23,7 @@ import { selectOrderIsLoading } from '@services/order/order-slice';
 import { createOrderThunk } from '@services/order/order-thunks';
 
 import type { TConstructorIngredient, TIngredient } from '@utils/types';
-import type { Identifier, XYCoord } from 'dnd-core';
+import type { Identifier } from 'dnd-core';
 
 import styles from './burger-constructor.module.css';
 
@@ -86,7 +86,7 @@ const ConstructorIngredient = ({
         return;
       }
 
-      const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
+      const hoverClientY = clientOffset.y - hoverBoundingRect.top;
 
       if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
         return;

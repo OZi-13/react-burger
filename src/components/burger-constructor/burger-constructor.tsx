@@ -6,7 +6,9 @@ import {
 } from '@krgaa/react-developer-burger-ui-components';
 import { useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
+import { useLocation, useNavigate } from 'react-router-dom';
 
+import { selectIsAuthChecked, selectUser } from '@services/auth/auth-slice';
 import {
   addConstructorIngredient,
   clearConstructor,
@@ -142,10 +144,14 @@ export const BurgerConstructor = ({
   onOrderClick,
 }: TBurgerConstructorProps): React.JSX.Element => {
   const dispatch = useAppDispatch();
+  const location = useLocation();
+  const navigate = useNavigate();
   const bun = useAppSelector(selectConstructorBun);
   const fillings = useAppSelector(selectConstructorIngredients);
   const totalPrice = useAppSelector(selectConstructorTotalPrice);
   const isOrderLoading = useAppSelector(selectOrderIsLoading);
+  const isAuthChecked = useAppSelector(selectIsAuthChecked);
+  const user = useAppSelector(selectUser);
 
   const [{ canDrop, isOver }, drop] = useDrop<
     TIngredientDragItem,
@@ -189,6 +195,13 @@ export const BurgerConstructor = ({
 
   const handleOrderClick = (): void => {
     if (!bun) {
+      return;
+    }
+
+    if (!user) {
+      void navigate('/login', {
+        state: { from: location },
+      });
       return;
     }
 
@@ -262,7 +275,7 @@ export const BurgerConstructor = ({
           <CurrencyIcon type="primary" />
         </span>
         <Button
-          disabled={!bun || fillings.length === 0 || isOrderLoading}
+          disabled={!bun || fillings.length === 0 || !isAuthChecked || isOrderLoading}
           htmlType="button"
           size="large"
           type="primary"

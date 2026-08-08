@@ -6,21 +6,3 @@
   color: var(--text-primary-color);
   background-color: var(--background-alt);
 }
-
-.main {
-  display: flex;
-  flex: 1 1 auto;
-  justify-content: space-between;
-  width: 1240px;
-  min-height: 0;
-  margin: 0 auto;
-  overflow: hidden;
-}
-
-.status {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  min-height: 400px;
-}

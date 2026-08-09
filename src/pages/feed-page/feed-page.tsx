@@ -1,5 +1,5 @@
 import { Preloader } from '@krgaa/react-developer-burger-ui-components';
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { OrderCard } from '@components/order-card/order-card';
@@ -31,6 +31,8 @@ export const FeedPage = (): React.JSX.Element => {
   const totalToday = useAppSelector(selectFeedTotalToday);
   const doneColumns = splitStatusNumbers(orders, 'done');
   const pendingColumns = splitStatusNumbers(orders, 'pending');
+  const statsRef = useRef<HTMLElement>(null);
+  const [ordersHeight, setOrdersHeight] = useState<number | null>(null);
 
   useEffect(() => {
     dispatch(feedConnect(ORDERS_FEED_WS_URL));
@@ -40,11 +42,34 @@ export const FeedPage = (): React.JSX.Element => {
     };
   }, [dispatch]);
 
+  useLayoutEffect(() => {
+    const statsElement = statsRef.current;
+
+    if (!statsElement) {
+      return undefined;
+    }
+
+    const updateOrdersHeight = (): void => {
+      setOrdersHeight(statsElement.offsetHeight);
+    };
+
+    updateOrdersHeight();
+
+    const resizeObserver = new ResizeObserver(updateOrdersHeight);
+    resizeObserver.observe(statsElement);
+    window.addEventListener('resize', updateOrdersHeight);
+
+    return (): void => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', updateOrdersHeight);
+    };
+  }, []);
+
   return (
     <>
       <PageHeader title="Лента заказов" />
       <main className={`${styles.main} pl-5 pr-5`}>
-        <section className={styles.orders}>
+        <section className={styles.orders} style={{ height: ordersHeight ?? undefined }}>
           {isLoading && orders.length === 0 && (
             <div className={styles.status}>
               <Preloader />
@@ -75,7 +100,7 @@ export const FeedPage = (): React.JSX.Element => {
             </ul>
           )}
         </section>
-        <section className={`${styles.stats} custom-scroll pr-2`}>
+        <section ref={statsRef} className={styles.stats}>
           <div className={styles.board}>
             <div>
               <h2 className="text text_type_main-medium mb-6">Готово:</h2>

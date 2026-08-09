@@ -51,6 +51,7 @@ export const App = (): React.JSX.Element => {
   const orderNumber = useAppSelector(selectOrderNumber);
   const isOrderLoading = useAppSelector(selectOrderIsLoading);
   const orderError = useAppSelector(selectOrderError);
+  const isScrollablePage = location.pathname.startsWith('/feed');
 
   useEffect(() => {
     void dispatch(fetchIngredients());
@@ -71,7 +72,9 @@ export const App = (): React.JSX.Element => {
   }, [dispatch]);
 
   return (
-    <div className={styles.app}>
+    <div
+      className={`${styles.app}${isScrollablePage ? ` ${styles.app_scrollable}` : ''}`}
+    >
       <AppHeader />
       <Routes location={background ?? location}>
         <Route

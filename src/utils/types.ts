@@ -34,6 +34,28 @@ export type TCreateOrderResponse = {
   };
 };
 
+export type TOrderStatus = 'created' | 'done' | 'pending';
+
+export type TOrder = {
+  _id: string;
+  ingredients: string[];
+  status: TOrderStatus;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+  number: number;
+};
+
+export type TOrdersResponse = TBaseResponse & {
+  orders: TOrder[];
+  total: number;
+  totalToday: number;
+};
+
+export type TOrderResponse = TBaseResponse & {
+  order: TOrder;
+};
+
 export type TUser = {
   email: string;
   name: string;

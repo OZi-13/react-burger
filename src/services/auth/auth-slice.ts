@@ -10,6 +10,7 @@ import {
   updateUserThunk,
 } from './auth-thunks';
 
+import type { PayloadAction } from '@reduxjs/toolkit';
 import type { TUser } from '@utils/types';
 
 type TAuthState = {
@@ -104,10 +105,10 @@ export const authSlice = createSlice({
   initialState,
   name: 'auth',
   reducers: {
-    setAuthChecked: (state, action: { payload: boolean }) => {
+    setAuthChecked: (state, action: PayloadAction<boolean>) => {
       state.isAuthChecked = action.payload;
     },
-    setUser: (state, action: { payload: TUser | null }) => {
+    setUser: (state, action: PayloadAction<TUser | null>) => {
       state.user = action.payload;
     },
   },

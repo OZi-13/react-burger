@@ -11,6 +11,7 @@ import { HomePage } from '@pages/home-page/home-page';
 import { IngredientPage } from '@pages/ingredient-page/ingredient-page';
 import { LoginPage } from '@pages/login-page/login-page';
 import { NotFoundPage } from '@pages/not-found-page/not-found-page';
+import { OrderPage } from '@pages/order-page/order-page';
 import { ProfileLayout } from '@pages/profile-layout/profile-layout';
 import { ProfileOrdersPage } from '@pages/profile-orders-page/profile-orders-page';
 import { ProfilePage } from '@pages/profile-page/profile-page';
@@ -50,6 +51,7 @@ export const App = (): React.JSX.Element => {
   const orderNumber = useAppSelector(selectOrderNumber);
   const isOrderLoading = useAppSelector(selectOrderIsLoading);
   const orderError = useAppSelector(selectOrderError);
+  const isScrollablePage = location.pathname.startsWith('/feed');
 
   useEffect(() => {
     void dispatch(fetchIngredients());
@@ -70,7 +72,9 @@ export const App = (): React.JSX.Element => {
   }, [dispatch]);
 
   return (
-    <div className={styles.app}>
+    <div
+      className={`${styles.app}${isScrollablePage ? ` ${styles.app_scrollable}` : ''}`}
+    >
       <AppHeader />
       <Routes location={background ?? location}>
         <Route
@@ -84,6 +88,10 @@ export const App = (): React.JSX.Element => {
           }
         />
         <Route path="/feed" element={<FeedPage />} />
+        <Route
+          path="/feed/:number"
+          element={<OrderPage connectOnMount source="feed" />}
+        />
         <Route
           path="/login"
           element={
@@ -118,6 +126,14 @@ export const App = (): React.JSX.Element => {
         />
         <Route path="/ingredients/:id" element={<IngredientPage />} />
         <Route
+          path="/profile/orders/:number"
+          element={
+            <ProtectedRoute>
+              <OrderPage connectOnMount source="profile" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/profile"
           element={
             <ProtectedRoute>
@@ -138,6 +154,24 @@ export const App = (): React.JSX.Element => {
               <Modal title="Детали ингредиента" onClose={handleCloseIngredientModal}>
                 <IngredientPage isModal />
               </Modal>
+            }
+          />
+          <Route
+            path="/feed/:number"
+            element={
+              <Modal onClose={handleCloseIngredientModal}>
+                <OrderPage isModal source="feed" />
+              </Modal>
+            }
+          />
+          <Route
+            path="/profile/orders/:number"
+            element={
+              <ProtectedRoute>
+                <Modal onClose={handleCloseIngredientModal}>
+                  <OrderPage isModal source="profile" />
+                </Modal>
+              </ProtectedRoute>
             }
           />
         </Routes>

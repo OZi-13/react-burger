@@ -1,0 +1,28 @@
+.orders {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+  padding-bottom: 20px;
+}
+
+.list {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+  margin: 0;
+  padding-left: 0;
+  overflow-y: auto;
+  list-style-type: none;
+}
+
+.status {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 320px;
+}

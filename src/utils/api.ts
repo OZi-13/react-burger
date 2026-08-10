@@ -1,4 +1,5 @@
 import { BURGER_API_URL } from '@utils/constants';
+import { getCachedOrderId } from '@utils/order-id-cache';
 import {
   clearAuthTokens,
   getAccessToken,
@@ -15,6 +16,8 @@ import type {
   TForgotPasswordRequest,
   TIngredientsResponse,
   TIngredient,
+  TOrder,
+  TOrderResponse,
   TMessageResponse,
   TRefreshTokenResponse,
   TRegisterRequest,
@@ -69,7 +72,7 @@ const request = <T>(endpoint: string, options: TRequestOptions = {}): Promise<T>
   }).then((response) => checkResponse<T>(response));
 };
 
-const refreshAuthToken = (): Promise<TRefreshTokenResponse> => {
+export const refreshAuthToken = (): Promise<TRefreshTokenResponse> => {
   const refreshToken = getRefreshToken();
 
   return request<TRefreshTokenResponse>('/auth/token', {
@@ -148,6 +151,22 @@ export const createOrder = (
   })
     .then((response) => {
       return checkSuccess(response).order.number;
+    })
+    .catch((error: unknown) => {
+      if (error instanceof Error) {
+        return Promise.reject(error);
+      }
+
+      return Promise.reject(new Error('Неизвестная ошибка запроса'));
+    });
+};
+
+export const getOrderByNumber = (number: string): Promise<TOrder> => {
+  const orderIdentifier = getCachedOrderId(number) ?? number;
+
+  return request<TOrderResponse>(`/orders/${orderIdentifier}`)
+    .then((response) => {
+      return checkSuccess(response).order;
     })
     .catch((error: unknown) => {
       if (error instanceof Error) {

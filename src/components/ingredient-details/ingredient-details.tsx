@@ -17,7 +17,7 @@ export const IngredientDetails = ({
   ingredient,
 }: TIngredientDetailsProps): React.JSX.Element => {
   return (
-    <article className={`${styles.details} pb-15`}>
+    <article className={`${styles.details} pb-15`} data-testid="ingredient-details">
       <img className={styles.image} src={ingredient.image_large} alt={ingredient.name} />
       <h3 className="text text_type_main-medium mt-4 mb-8">{ingredient.name}</h3>
       <ul className={styles.nutrition}>

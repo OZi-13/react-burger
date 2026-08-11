@@ -221,7 +221,11 @@ export const BurgerConstructor = ({
   };
 
   return (
-    <section ref={drop} className={`${styles.burger_constructor} pt-15`}>
+    <section
+      ref={drop}
+      className={`${styles.burger_constructor} pt-15`}
+      data-testid="burger-constructor"
+    >
       {bun ? (
         <ConstructorElement
           extraClass="ml-8"

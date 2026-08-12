@@ -31,7 +31,7 @@ const initialFeedState: TOrdersFeedState = {
   totalToday: 0,
 };
 
-const initialState: TOrdersState = {
+export const initialState: TOrdersState = {
   currentOrder: null,
   currentOrderError: '',
   currentOrderIsLoading: false,

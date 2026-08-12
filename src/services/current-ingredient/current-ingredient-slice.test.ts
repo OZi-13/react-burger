@@ -3,6 +3,7 @@ import { bunIngredient } from '@utils/test-fixtures';
 import {
   clearCurrentIngredient,
   currentIngredientSlice,
+  initialState,
   setCurrentIngredient,
 } from './current-ingredient-slice';
 
@@ -10,9 +11,7 @@ describe('currentIngredientSlice', () => {
   it('returns the initial state', () => {
     const result = currentIngredientSlice.reducer(undefined, { type: '' });
 
-    expect(result).toEqual({
-      ingredient: null,
-    });
+    expect(result).toEqual(initialState);
   });
 
   it('sets the current ingredient', () => {
@@ -32,8 +31,6 @@ describe('currentIngredientSlice', () => {
       clearCurrentIngredient()
     );
 
-    expect(result).toEqual({
-      ingredient: null,
-    });
+    expect(result).toEqual(initialState);
   });
 });

@@ -1,31 +1,17 @@
 import { expect, test } from '@playwright/test';
 
-import type { Page } from '@playwright/test';
+import { BURGER_API_URL } from '../src/utils/constants';
+
+import { ConstructorPage } from './pages/constructor-page';
 
 const BUN_ID = 'bun-id';
 const SAUCE_ID = 'sauce-id';
-
-const dragIngredientToConstructor = async (
-  page: Page,
-  ingredientId: string
-): Promise<void> => {
-  const dataTransfer = await page.evaluateHandle(() => new DataTransfer());
-  const ingredient = page.getByTestId(`ingredient-card-${ingredientId}`);
-  const constructor = page.getByTestId('burger-constructor');
-
-  await ingredient.dispatchEvent('dragstart', { dataTransfer });
-  await constructor.dispatchEvent('dragenter', { dataTransfer });
-  await constructor.dispatchEvent('dragover', { dataTransfer });
-  await constructor.dispatchEvent('drop', { dataTransfer });
-  await ingredient.dispatchEvent('dragend', { dataTransfer });
-  await dataTransfer.dispose();
-};
 
 test.describe('Burger constructor', () => {
   test.beforeEach(async ({ page }) => {
     await page.routeFromHAR('./e2e/hars/constructor.har', {
       notFound: 'abort',
-      url: 'https://new-stellarburgers.education-services.ru/api/**',
+      url: `${BURGER_API_URL}/**`,
     });
 
     await page.addInitScript(() => {
@@ -37,42 +23,41 @@ test.describe('Burger constructor', () => {
   test('allows a user to inspect an ingredient, build a burger and create an order', async ({
     page,
   }) => {
-    await page.goto('./');
+    const constructorPage = new ConstructorPage(page);
 
-    const bunCard = page.getByTestId(`ingredient-card-${BUN_ID}`);
-    const sauceCard = page.getByTestId(`ingredient-card-${SAUCE_ID}`);
-    const constructor = page.getByTestId('burger-constructor');
-    const orderButton = page.getByRole('button', { name: 'Оформить заказ' });
+    await constructorPage.goto();
 
-    await expect(bunCard).toBeVisible();
+    await expect(constructorPage.getIngredientCard(BUN_ID)).toBeVisible();
 
-    await bunCard.click();
-    await expect(page.getByTestId('modal')).toBeVisible();
-    await expect(page.getByTestId('ingredient-details')).toContainText(
+    await constructorPage.getIngredientCard(BUN_ID).click();
+    await expect(constructorPage.modal).toBeVisible();
+    await expect(constructorPage.ingredientDetails).toContainText(
       'Краторная булка N-200i'
     );
-    await expect(page.getByTestId('ingredient-details')).toContainText('420');
+    await expect(constructorPage.ingredientDetails).toContainText('420');
 
-    await page.getByTestId('modal-close').click();
-    await expect(page.getByTestId('modal')).not.toBeVisible();
+    await constructorPage.closeModal();
+    await expect(constructorPage.modal).not.toBeVisible();
 
-    await dragIngredientToConstructor(page, BUN_ID);
-    await dragIngredientToConstructor(page, SAUCE_ID);
+    await constructorPage.dragIngredientToConstructor(BUN_ID);
+    await constructorPage.dragIngredientToConstructor(SAUCE_ID);
 
-    await expect(constructor).toContainText('Краторная булка N-200i (верх)');
-    await expect(constructor).toContainText('Краторная булка N-200i (низ)');
-    await expect(constructor).toContainText('Соус Spicy-X');
-    await expect(orderButton).toBeEnabled();
-
-    await orderButton.click();
-
-    await expect(page.getByTestId('modal')).toBeVisible();
-    await expect(page.getByTestId('order-details')).toContainText(
-      'идентификатор заказа'
+    await expect(constructorPage.burgerConstructor).toContainText(
+      'Краторная булка N-200i (верх)'
     );
-    await expect(page.getByTestId('order-number')).toHaveText('424242');
+    await expect(constructorPage.burgerConstructor).toContainText(
+      'Краторная булка N-200i (низ)'
+    );
+    await expect(constructorPage.burgerConstructor).toContainText('Соус Spicy-X');
+    await expect(constructorPage.orderButton).toBeEnabled();
 
-    await page.getByTestId('modal-close').click();
-    await expect(page.getByTestId('modal')).not.toBeVisible();
+    await constructorPage.orderButton.click();
+
+    await expect(constructorPage.modal).toBeVisible();
+    await expect(constructorPage.orderDetails).toContainText('идентификатор заказа');
+    await expect(constructorPage.orderNumber).toHaveText('424242');
+
+    await constructorPage.closeModal();
+    await expect(constructorPage.modal).not.toBeVisible();
   });
 });

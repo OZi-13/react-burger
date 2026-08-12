@@ -8,6 +8,7 @@ import {
   feedOnError,
   feedOnMessage,
   feedOnOpen,
+  initialState,
   ordersSlice,
   profileOrdersConnect,
   profileOrdersDisconnect,
@@ -29,51 +30,16 @@ describe('ordersSlice', () => {
   it('returns the initial state', () => {
     const result = ordersSlice.reducer(undefined, { type: '' });
 
-    expect(result).toEqual({
-      currentOrder: null,
-      currentOrderError: '',
-      currentOrderIsLoading: false,
-      feed: {
-        error: '',
-        isConnected: false,
-        isLoading: false,
-        orders: [],
-        total: 0,
-        totalToday: 0,
-      },
-      profile: {
-        error: '',
-        isConnected: false,
-        isLoading: false,
-        orders: [],
-        total: 0,
-        totalToday: 0,
-      },
-    });
+    expect(result).toEqual(initialState);
   });
 
   it('clears current order state', () => {
     const result = ordersSlice.reducer(
       {
+        ...initialState,
         currentOrder: order,
         currentOrderError: 'Error',
         currentOrderIsLoading: true,
-        feed: {
-          error: '',
-          isConnected: false,
-          isLoading: false,
-          orders: [],
-          total: 0,
-          totalToday: 0,
-        },
-        profile: {
-          error: '',
-          isConnected: false,
-          isLoading: false,
-          orders: [],
-          total: 0,
-          totalToday: 0,
-        },
       },
       clearCurrentOrder()
     );
@@ -118,14 +84,7 @@ describe('ordersSlice', () => {
       isConnected: false,
       isLoading: false,
     });
-    expect(disconnectResult.feed).toEqual({
-      error: '',
-      isConnected: false,
-      isLoading: false,
-      orders: [],
-      total: 0,
-      totalToday: 0,
-    });
+    expect(disconnectResult.feed).toEqual(initialState.feed);
   });
 
   it('stores feed orders from websocket message', () => {
@@ -182,14 +141,7 @@ describe('ordersSlice', () => {
       isConnected: false,
       isLoading: false,
     });
-    expect(disconnectResult.profile).toEqual({
-      error: '',
-      isConnected: false,
-      isLoading: false,
-      orders: [],
-      total: 0,
-      totalToday: 0,
-    });
+    expect(disconnectResult.profile).toEqual(initialState.profile);
   });
 
   it('stores profile orders from websocket message', () => {
@@ -211,25 +163,9 @@ describe('ordersSlice', () => {
   it('sets loading state while current order is requested', () => {
     const result = ordersSlice.reducer(
       {
+        ...initialState,
         currentOrder: order,
         currentOrderError: 'Error',
-        currentOrderIsLoading: false,
-        feed: {
-          error: '',
-          isConnected: false,
-          isLoading: false,
-          orders: [],
-          total: 0,
-          totalToday: 0,
-        },
-        profile: {
-          error: '',
-          isConnected: false,
-          isLoading: false,
-          orders: [],
-          total: 0,
-          totalToday: 0,
-        },
       },
       fetchOrderByNumber.pending('request-id', String(order.number))
     );
@@ -242,25 +178,8 @@ describe('ordersSlice', () => {
   it('stores current order after successful request', () => {
     const result = ordersSlice.reducer(
       {
-        currentOrder: null,
-        currentOrderError: '',
+        ...initialState,
         currentOrderIsLoading: true,
-        feed: {
-          error: '',
-          isConnected: false,
-          isLoading: false,
-          orders: [],
-          total: 0,
-          totalToday: 0,
-        },
-        profile: {
-          error: '',
-          isConnected: false,
-          isLoading: false,
-          orders: [],
-          total: 0,
-          totalToday: 0,
-        },
       },
       fetchOrderByNumber.fulfilled(order, 'request-id', String(order.number))
     );
@@ -272,25 +191,8 @@ describe('ordersSlice', () => {
   it('stores an error after failed current order request', () => {
     const result = ordersSlice.reducer(
       {
-        currentOrder: null,
-        currentOrderError: '',
+        ...initialState,
         currentOrderIsLoading: true,
-        feed: {
-          error: '',
-          isConnected: false,
-          isLoading: false,
-          orders: [],
-          total: 0,
-          totalToday: 0,
-        },
-        profile: {
-          error: '',
-          isConnected: false,
-          isLoading: false,
-          orders: [],
-          total: 0,
-          totalToday: 0,
-        },
       },
       fetchOrderByNumber.rejected(
         new Error('Network error'),

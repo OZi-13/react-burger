@@ -1,6 +1,6 @@
 import { user } from '@utils/test-fixtures';
 
-import { authSlice, setAuthChecked, setUser } from './auth-slice';
+import { authSlice, initialState, setAuthChecked, setUser } from './auth-slice';
 import {
   checkUserAuthThunk,
   forgotPasswordThunk,
@@ -20,12 +20,7 @@ describe('authSlice', () => {
   it('returns the initial state', () => {
     const result = authSlice.reducer(undefined, { type: '' });
 
-    expect(result).toEqual({
-      error: '',
-      isAuthChecked: false,
-      isLoading: false,
-      user: null,
-    });
+    expect(result).toEqual(initialState);
   });
 
   it('sets auth checked flag', () => {
@@ -43,10 +38,9 @@ describe('authSlice', () => {
   it('handles successful register request', () => {
     const result = authSlice.reducer(
       {
+        ...initialState,
         error: 'Error',
-        isAuthChecked: false,
         isLoading: true,
-        user: null,
       },
       registerThunk.fulfilled(user, 'request-id', { ...authRequest, name: user.name })
     );
@@ -62,10 +56,9 @@ describe('authSlice', () => {
   it('handles successful login request', () => {
     const result = authSlice.reducer(
       {
+        ...initialState,
         error: 'Error',
-        isAuthChecked: false,
         isLoading: true,
-        user: null,
       },
       loginThunk.fulfilled(user, 'request-id', authRequest)
     );
@@ -81,6 +74,7 @@ describe('authSlice', () => {
   it('handles successful logout request', () => {
     const result = authSlice.reducer(
       {
+        ...initialState,
         error: 'Error',
         isAuthChecked: true,
         isLoading: true,
@@ -104,6 +98,7 @@ describe('authSlice', () => {
     };
     const result = authSlice.reducer(
       {
+        ...initialState,
         error: 'Error',
         isAuthChecked: true,
         isLoading: true,
@@ -123,10 +118,9 @@ describe('authSlice', () => {
   it('handles successful auth check request', () => {
     const result = authSlice.reducer(
       {
+        ...initialState,
         error: 'Error',
-        isAuthChecked: false,
         isLoading: true,
-        user: null,
       },
       checkUserAuthThunk.fulfilled(user, 'request-id')
     );
@@ -142,10 +136,9 @@ describe('authSlice', () => {
   it('handles successful password requests', () => {
     const forgotResult = authSlice.reducer(
       {
+        ...initialState,
         error: 'Error',
-        isAuthChecked: false,
         isLoading: true,
-        user: null,
       },
       forgotPasswordThunk.fulfilled(undefined, 'request-id', {
         email: user.email,
@@ -153,10 +146,9 @@ describe('authSlice', () => {
     );
     const resetResult = authSlice.reducer(
       {
+        ...initialState,
         error: 'Error',
-        isAuthChecked: false,
         isLoading: true,
-        user: null,
       },
       resetPasswordThunk.fulfilled(undefined, 'request-id', {
         password: 'password',
@@ -177,10 +169,9 @@ describe('authSlice', () => {
   it('sets loading state for pending auth requests', () => {
     const result = authSlice.reducer(
       {
+        ...initialState,
         error: 'Error',
-        isAuthChecked: false,
         isLoading: false,
-        user: null,
       },
       loginThunk.pending('request-id', authRequest)
     );
@@ -196,10 +187,8 @@ describe('authSlice', () => {
   it('stores rejected request error message', () => {
     const result = authSlice.reducer(
       {
-        error: '',
-        isAuthChecked: false,
+        ...initialState,
         isLoading: true,
-        user: null,
       },
       loginThunk.rejected(
         new Error('Неверный email или пароль'),
@@ -219,10 +208,8 @@ describe('authSlice', () => {
   it('stores fallback error message when rejected request has no message', () => {
     const result = authSlice.reducer(
       {
-        error: '',
-        isAuthChecked: false,
+        ...initialState,
         isLoading: true,
-        user: null,
       },
       {
         error: {},

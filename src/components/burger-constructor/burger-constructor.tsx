@@ -222,7 +222,9 @@ export const BurgerConstructor = ({
 
   return (
     <section
-      ref={drop}
+      ref={(node) => {
+        drop(node);
+      }}
       className={`${styles.burger_constructor} pt-15`}
       data-testid="burger-constructor"
     >

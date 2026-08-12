@@ -10,6 +10,7 @@ import {
   addConstructorIngredient,
   burgerConstructorSlice,
   clearConstructor,
+  initialState,
   moveConstructorIngredient,
   removeConstructorIngredient,
   selectConstructorTotalPrice,
@@ -20,10 +21,7 @@ describe('burgerConstructorSlice', () => {
   it('returns the initial state', () => {
     const result = burgerConstructorSlice.reducer(undefined, { type: '' });
 
-    expect(result).toEqual({
-      bun: null,
-      ingredients: [],
-    });
+    expect(result).toEqual(initialState);
   });
 
   it('adds a bun to constructor state', () => {
@@ -118,10 +116,7 @@ describe('burgerConstructorSlice', () => {
       clearConstructor()
     );
 
-    expect(result).toEqual({
-      bun: null,
-      ingredients: [],
-    });
+    expect(result).toEqual(initialState);
   });
 
   it('calculates ingredient counts', () => {

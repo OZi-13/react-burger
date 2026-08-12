@@ -49,6 +49,7 @@ const IngredientCard = ({
     <button
       ref={cardRef}
       className={`${styles.card}${isDragging ? ` ${styles.card_dragging}` : ''}`}
+      data-testid={`ingredient-card-${ingredient._id}`}
       type="button"
       onClick={() => onIngredientClick(ingredient)}
     >

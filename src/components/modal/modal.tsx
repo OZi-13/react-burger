@@ -40,12 +40,18 @@ export const Modal = ({
   return createPortal(
     <>
       <ModalOverlay onClose={onClose} />
-      <section className={styles.modal} aria-modal="true" role="dialog">
+      <section
+        className={styles.modal}
+        aria-modal="true"
+        data-testid="modal"
+        role="dialog"
+      >
         <header className={styles.header}>
           {title && <h2 className="text text_type_main-large">{title}</h2>}
           <button
             aria-label="Закрыть"
             className={styles.close}
+            data-testid="modal-close"
             type="button"
             onClick={onClose}
           >

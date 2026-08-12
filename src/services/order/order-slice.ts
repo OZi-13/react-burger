@@ -8,7 +8,7 @@ type TOrderState = {
   number: number | null;
 };
 
-const initialState: TOrderState = {
+export const initialState: TOrderState = {
   error: '',
   isLoading: false,
   number: null,

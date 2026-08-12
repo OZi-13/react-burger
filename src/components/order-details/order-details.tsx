@@ -36,9 +36,9 @@ export const OrderDetails = ({
   }
 
   return (
-    <article className={`${styles.details} pt-4 pb-30`}>
+    <article className={`${styles.details} pt-4 pb-30`} data-testid="order-details">
       <p className={`${styles.number} text text_type_digits-large mb-8`}>
-        {orderNumber}
+        <span data-testid="order-number">{orderNumber}</span>
       </p>
       <p className="text text_type_main-medium mb-15">идентификатор заказа</p>
       <div className={`${styles.icon} mb-15`}>
